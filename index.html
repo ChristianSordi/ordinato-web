@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--
+  Ordinato — pagina di atterraggio per la conferma del cambio email (Fase 1).
+  Artefatto STATICO da ospitare ESTERNAMENTE (GitHub Pages / Vercel / bucket
+  pubblico Supabase). Nessun segreto, nessuna logica di auth: la verifica del
+  token avviene server-side su Supabase PRIMA del redirect qui.
+
+  Fase 2 (piano dedicato): qui si aggiungerà un bottone "Apri Ordinato" che
+  lancia lo scheme `ordinato://email-changed` (desktop) / App-Universal Links
+  (mobile), con fallback al messaggio sottostante quando l'app non è presente.
+-->
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Ordinato — Conferma email</title>
+  <style>
+    :root {
+      --bg: #fef7ff;
+      --surface: #ffffff;
+      --on-surface: #1d1b20;
+      --on-surface-variant: #49454f;
+      --primary: #6750a4;
+      --outline: #cac4d0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141218;
+        --surface: #211f26;
+        --on-surface: #e6e0e9;
+        --on-surface-variant: #cac4d0;
+        --primary: #d0bcff;
+        --outline: #49454f;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+      color: var(--on-surface);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 28px;
+      max-width: 460px;
+      width: 100%;
+      padding: 32px;
+      text-align: center;
+    }
+    .icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      color: var(--primary);
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    p { color: var(--on-surface-variant); margin: 0 0 8px; }
+    .status {
+      margin: 16px 0 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--primary) 14%, transparent);
+      color: var(--on-surface);
+      font-weight: 500;
+      display: none;
+    }
+    .status.show { display: block; }
+    .lang { margin-top: 24px; border-top: 1px solid var(--outline); padding-top: 16px; }
+    .lang p { font-size: 0.95rem; }
+    .muted { font-size: 0.85rem; color: var(--on-surface-variant); margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+
+    <!-- Messaggio dinamico passato da Supabase via #message=... -->
+    <p id="status" class="status" role="status"></p>
+
+    <!-- Italiano -->
+    <h1>Link confermato</h1>
+    <p>
+      Per completare il cambio email devi cliccare il link inviato
+      <strong>sia all'indirizzo attuale sia a quello nuovo</strong>.
+    </p>
+    <p>
+      Quando hai confermato entrambi, torna su <strong>Ordinato</strong> e premi
+      <strong>«Ho confermato — aggiorna»</strong>.
+    </p>
+
+    <!-- English -->
+    <div class="lang">
+      <h1>Link confirmed</h1>
+      <p>
+        To complete the email change you must click the link sent to
+        <strong>both your current and your new address</strong>.
+      </p>
+      <p>
+        Once you've confirmed both, return to <strong>Ordinato</strong> and tap
+        <strong>"I've confirmed — refresh"</strong>.
+      </p>
+    </div>
+
+    <p class="muted">Puoi chiudere questa scheda. · You can close this tab.</p>
+  </main>
+
+  <script>
+    // Supabase appende es. "#message=Confirmation+link+accepted.+Please+proceed..."
+    // Lo mostriamo per chiarire se manca ancora la seconda conferma.
+    (function () {
+      try {
+        var hash = window.location.hash.replace(/^#/, '');
+        var params = new URLSearchParams(hash);
+        var msg = params.get('message');
+        if (msg) {
+          var el = document.getElementById('status');
+          el.textContent = msg;
+          el.classList.add('show');
+        }
+      } catch (e) {
+        /* no-op: la pagina resta valida anche senza messaggio */
+      }
+    })();
+  </script>
+</body>
+</html>
