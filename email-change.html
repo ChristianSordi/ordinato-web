@@ -120,16 +120,21 @@
   </main>
 
   <script>
-    // Supabase appende es. "#message=Confirmation+link+accepted.+Please+proceed..."
-    // Lo mostriamo per chiarire se manca ancora la seconda conferma.
+    // Supabase reindirizza qui con "#message=Confirmation link accepted..."
+    // (solo in inglese). La presenza del parametro significa che QUESTO link
+    // è stato confermato: mostriamo un avviso NOSTRO, bilingue, invece del
+    // testo grezzo di Supabase.
     (function () {
       try {
-        var hash = window.location.hash.replace(/^#/, '');
-        var params = new URLSearchParams(hash);
-        var msg = params.get('message');
-        if (msg) {
+        var params = new URLSearchParams(
+          window.location.hash.replace(/^#/, ''),
+        );
+        if (params.get('message') || params.get('type')) {
           var el = document.getElementById('status');
-          el.textContent = msg;
+          el.textContent =
+            '✓ Questo link è confermato — conferma anche il link inviato ' +
+            "all'altro indirizzo.   ·   ✓ This link is confirmed — also " +
+            'confirm the link sent to the other address.';
           el.classList.add('show');
         }
       } catch (e) {
